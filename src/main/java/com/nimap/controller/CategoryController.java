@@ -18,11 +18,14 @@ public class CategoryController {
 	@Autowired
 	private CategoryService categoryService;
 
-	@GetMapping
-	public List<CategoryDTO> getAllCategories() {
-		List<Category> categories = categoryService.getAllCategories();
-		return categories.stream().map(this::convertToCategoryDTO).collect(Collectors.toList());
-	}
+	 @GetMapping
+    public ResponseEntity<List<CategoryDTO>> getAllCategories(Pageable pageable) {
+        Page<Category> categoryPage = categoryService.getAllCategories(pageable);
+        List<CategoryDTO> categoryDTOs = categoryPage.getContent().stream()
+                .map(this::convertToCategoryDTO)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(categoryDTOs, HttpStatus.OK);
+    }
 
 	@GetMapping("/{id}")
 	public CategoryDTO getCategoryById(@PathVariable Long id) {
@@ -49,19 +52,17 @@ public class CategoryController {
 		categoryService.deleteCategory(id);
 	}
 
-	private CategoryDTO convertToCategoryDTO(Category category) {
-		CategoryDTO categoryDTO = new CategoryDTO();
-		categoryDTO.setId(category.getId());
-		categoryDTO.setName(category.getName());
+	  private CategoryDTO convertToCategoryDTO(Category category) {
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(category.getId());
+        categoryDTO.setName(category.getName());
+        return categoryDTO;
+    }
 
-		return categoryDTO;
-	}
-
-	private Category convertToCategory(CategoryDTO categoryDTO) {
-		Category category = new Category();
-		category.setId(categoryDTO.getId());
-		category.setName(categoryDTO.getName());
-
-		return category;
+    private Category convertToCategory(CategoryDTO categoryDTO) {
+        Category category = new Category();
+        category.setId(categoryDTO.getId());
+        category.setName(categoryDTO.getName());
+        return category;
 	}
 }
